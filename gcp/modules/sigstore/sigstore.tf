@@ -203,11 +203,6 @@ module "mysql" {
   ]
 }
 
-moved {
-  from = module.mysql.google_sql_database.searchindexes
-  to   = module.rekor.google_sql_database.searchindexes
-}
-
 // Rekor
 module "rekor" {
   source = "../rekor"
@@ -368,11 +363,6 @@ module "ctlog_shards" {
   replica_zones = var.mysql_replica_zones
   replica_tier  = var.mysql_replica_tier
 
-  // We want to use consistent password across mysql DB instances, because
-  // this is access only at the DB level and access to the DB instance is gated
-  // by the IAM as well as private network.
-  password = module.mysql.mysql_pass
-
   network = module.network.network_self_link
 
   db_name = var.ctlog_mysql_db_name
@@ -420,11 +410,6 @@ module "standalone_mysqls" {
 
   replica_zones = var.mysql_replica_zones
   replica_tier  = var.mysql_replica_tier
-
-  // We want to use consistent password across mysql DB instances, because
-  // this is access only at the DB level and access to the DB instance is gated
-  // by the IAM as well as private network.
-  password = module.mysql.mysql_pass
 
   network = module.network.network_self_link
 

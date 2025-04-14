@@ -190,56 +190,6 @@ resource "google_sql_database" "trillian" {
   depends_on = [google_sql_database_instance.sigstore]
 }
 
-resource "google_sql_user" "trillian" {
-  name       = "trillian"
-  project    = var.project_id
-  instance   = google_sql_database_instance.sigstore.name
-  password   = data.google_secret_manager_secret_version_access.mysql-password.secret_data
-  host       = "%"
-  depends_on = [google_sql_database_instance.sigstore]
-}
-
-resource "google_secret_manager_secret" "mysql-password" {
-  secret_id = "mysql-password"
-
-  replication {
-    auto {}
-  }
-  depends_on = [google_project_service.service]
-}
-
-resource "google_secret_manager_secret" "mysql-user" {
-  secret_id = "mysql-user"
-
-  replication {
-    auto {}
-  }
-  depends_on = [google_project_service.service]
-}
-
-resource "google_secret_manager_secret_version" "mysql-user" {
-  secret      = google_secret_manager_secret.mysql-user.id
-  secret_data = google_sql_user.trillian.name
-}
-
-resource "google_secret_manager_secret" "mysql-database" {
-  secret_id = "mysql-database"
-
-  replication {
-    auto {}
-  }
-  depends_on = [google_project_service.service]
-}
-
-resource "google_secret_manager_secret_version" "mysql-database" {
-  secret      = google_secret_manager_secret.mysql-database.id
-  secret_data = google_sql_database.trillian.name
-}
-
-data "google_secret_manager_secret_version_access" "mysql-password" {
-  secret = google_secret_manager_secret.mysql-password.id
-}
-
 // be sure to manually GRANT SELECT, INSERT, CREATE privileges for this user
 resource "google_sql_user" "iam_user" {
   name     = google_service_account.dbuser_trillian.email
